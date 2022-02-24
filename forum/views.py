@@ -1,7 +1,7 @@
 from rest_framework import permissions, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from .serializer import PostMakeSerializer, PostVoteSerializer, ReplyMakeSerializer
+from .serializer import PostMakeSerializer, PostVoteSerializer, ReplyMakeSerializer, ReplyVoteSerializer
 
 
 # Make a Post
@@ -37,16 +37,33 @@ class VotePost(APIView):
 
 
 # Post's Reply
-class Replies(APIView):
+class ReplyPost(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request):
         serializer = ReplyMakeSerializer(data=request.data, user=request.user)
 
         if serializer.is_valid():
+            reply = serializer.save()
+            if reply:
+                return Response("Submit Reply Successfully!!!", status=status.HTTP_201_CREATED)
+            else:
+                return Response("Failed!", status=status.HTTP_400_BAD_REQUEST)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+# Vote Reply
+class VoteReply(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request):
+        serializer = ReplyVoteSerializer(data=request.data, user=request.user)
+
+        if serializer.is_valid():
             vote = serializer.save()
             if vote:
-                return Response("Submit Reply Successfully!!!", status=status.HTTP_201_CREATED)
+                return Response("Vote for reply successfully!!!", status=status.HTTP_201_CREATED)
             else:
                 return Response("Failed!", status=status.HTTP_400_BAD_REQUEST)
         else:

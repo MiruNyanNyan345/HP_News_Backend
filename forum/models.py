@@ -49,14 +49,14 @@ class Replies(models.Model):
 
 class ReplyVoteCount(models.Model):
     reply = models.ForeignKey(Replies, on_delete=models.CASCADE)
-    voteUpCount = models.IntegerField(default=0)
-    voteDownCount = models.IntegerField(default=0)
+    vote = models.BooleanField()
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    datetime = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return "Reply: {}\nUp-Count: {}\nDown-Count: {}\nUser: {}".format(
+        return "Reply: {}\nVote: {}\nUser: {}\nVote DateTime: {}".format(
             self.reply,
-            self.voteUpCount,
-            self.voteDownCount,
-            self.user
+            self.vote,
+            self.user,
+            self.datetime
         )
