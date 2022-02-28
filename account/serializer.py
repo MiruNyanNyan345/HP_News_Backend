@@ -11,6 +11,11 @@ class UserAuthenticateSerializer(TokenObtainPairSerializer):
         token = super(UserAuthenticateSerializer, cls).get_token(user)
         return token
 
+    def validate(self, user):
+        data = super(UserAuthenticateSerializer, self).validate(user)
+        data.update({"username": self.user.username})
+        return data
+
 
 class UserCreateSerializer(serializers.ModelSerializer):
     email = serializers.EmailField(required=True)
@@ -28,6 +33,7 @@ class UserCreateSerializer(serializers.ModelSerializer):
 
         # confirm_password only used for validation
         confirm_password = data["confirm_password"]
+
         if not password:
             raise serializers.ValidationError('Please enter the Password!')
         if not confirm_password:
