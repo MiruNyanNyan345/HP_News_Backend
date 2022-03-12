@@ -1,7 +1,21 @@
 from rest_framework import permissions, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from .serializer import PostMakeSerializer, PostVoteSerializer, ReplyMakeSerializer, ReplyVoteSerializer
+
+from .models import Posts
+from .serializer import PostMakeSerializer, PostVoteSerializer, ReplyMakeSerializer, ReplyVoteSerializer, \
+    PostsGetSerializer
+
+
+# Get all Posts
+class GetPosts(APIView):
+    permission_classes = [permissions.AllowAny]
+
+    def get(self, request):
+        # First post come first
+        allPosts = Posts.objects.all().order_by("-datetime")
+        serializer = PostsGetSerializer(allPosts, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 # Make a Post

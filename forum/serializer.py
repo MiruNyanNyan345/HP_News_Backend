@@ -5,6 +5,12 @@ from rest_framework import serializers
 from .models import Posts, PostVoteCount, Replies, ReplyVoteCount
 
 
+class PostsGetSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Posts
+        fields = "__all__"
+
+
 class PostMakeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Posts
