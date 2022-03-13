@@ -2,20 +2,20 @@ from rest_framework import permissions, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .models import Posts
-from .serializer import PostMakeSerializer, PostVoteSerializer, ReplyMakeSerializer, ReplyVoteSerializer, \
-    PostsGetSerializer
+from .models import Posts, PostVotes
+from .serializer import MakePostSerializer, VotePostSerializer, ReplyPostSerializer, VoteReplySerializer, \
+    GetPostsSerializer
 
 
-# Get all Posts
+# Get all Posts and their Votes
 class GetPosts(APIView):
     permission_classes = [permissions.AllowAny]
 
     def get(self, request):
         # First post come first
-        allPosts = Posts.objects.all().order_by("-datetime")
-        serializer = PostsGetSerializer(allPosts, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        posts = Posts.objects.all().order_by("-datetime")
+        p_serializer = GetPostsSerializer(posts, many=True)
+        return Response(p_serializer.data, status=status.HTTP_200_OK)
 
 
 # Make a Post
@@ -23,7 +23,7 @@ class MakePost(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request):
-        serializer = PostMakeSerializer(data=request.data, user=request.user)
+        serializer = MakePostSerializer(data=request.data, user=request.user)
 
         if serializer.is_valid():
             post = serializer.save()
@@ -38,7 +38,7 @@ class VotePost(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request):
-        serializer = PostVoteSerializer(data=request.data, user=request.user)
+        serializer = VotePostSerializer(data=request.data, user=request.user)
 
         if serializer.is_valid():
             vote = serializer.save()
@@ -55,7 +55,7 @@ class ReplyPost(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request):
-        serializer = ReplyMakeSerializer(data=request.data, user=request.user)
+        serializer = ReplyPostSerializer(data=request.data, user=request.user)
 
         if serializer.is_valid():
             reply = serializer.save()
@@ -72,7 +72,7 @@ class VoteReply(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request):
-        serializer = ReplyVoteSerializer(data=request.data, user=request.user)
+        serializer = VoteReplySerializer(data=request.data, user=request.user)
 
         if serializer.is_valid():
             vote = serializer.save()

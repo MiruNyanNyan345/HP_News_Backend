@@ -2,23 +2,32 @@ from datetime import datetime
 
 from rest_framework import serializers
 
-from .models import Posts, PostVoteCount, Replies, ReplyVoteCount
+from .models import Posts, PostVotes, Replies, ReplyVoteCount
 
 
-class PostsGetSerializer(serializers.ModelSerializer):
+class GetPostsVotesSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PostVotes
+        fields = ("post_id", "vote")
+
+
+class GetPostsSerializer(serializers.ModelSerializer):
+    post_votes = GetPostsVotesSerializer(read_only=True, many=True)
+
     class Meta:
         model = Posts
-        fields = "__all__"
+        fields = ("id", "title", "body", "author", "datetime", "post_votes")
+        depth = 1
 
 
-class PostMakeSerializer(serializers.ModelSerializer):
+class MakePostSerializer(serializers.ModelSerializer):
     class Meta:
         model = Posts
         fields = ('title', 'body')
 
     def __init__(self, *args, **kwargs):
         self.user = kwargs.pop("user")
-        super(PostMakeSerializer, self).__init__(*args, **kwargs)
+        super(MakePostSerializer, self).__init__(*args, **kwargs)
 
     def create(self, validated_data):
         instance = self.Meta.model(title=validated_data["title"],
@@ -32,14 +41,14 @@ class PostMakeSerializer(serializers.ModelSerializer):
         return instance
 
 
-class PostVoteSerializer(serializers.ModelSerializer):
+class VotePostSerializer(serializers.ModelSerializer):
     class Meta:
-        model = PostVoteCount
+        model = PostVotes
         fields = ("post", "vote")
 
     def __init__(self, *args, **kwargs):
         self.user = kwargs.pop("user")
-        super(PostVoteSerializer, self).__init__(*args, **kwargs)
+        super(VotePostSerializer, self).__init__(*args, **kwargs)
 
     def validate(self, data):
         user = self.user
@@ -64,14 +73,14 @@ class PostVoteSerializer(serializers.ModelSerializer):
         return instance
 
 
-class ReplyMakeSerializer(serializers.ModelSerializer):
+class ReplyPostSerializer(serializers.ModelSerializer):
     class Meta:
         model = Replies
         fields = ('post', 'body')
 
     def __init__(self, *args, **kwargs):
         self.user = kwargs.pop("user")
-        super(ReplyMakeSerializer, self).__init__(*args, **kwargs)
+        super(ReplyPostSerializer, self).__init__(*args, **kwargs)
 
     def create(self, data):
         author_id = self.user.id
@@ -87,14 +96,14 @@ class ReplyMakeSerializer(serializers.ModelSerializer):
         return instance
 
 
-class ReplyVoteSerializer(serializers.ModelSerializer):
+class VoteReplySerializer(serializers.ModelSerializer):
     class Meta:
         model = ReplyVoteCount
         fields = ("reply", "vote")
 
     def __init__(self, *args, **kwargs):
         self.user = kwargs.pop("user")
-        super(ReplyVoteSerializer, self).__init__(*args, **kwargs)
+        super(VoteReplySerializer, self).__init__(*args, **kwargs)
 
     def validate(self, data):
         user_id = self.user.id

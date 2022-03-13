@@ -17,9 +17,8 @@ class Posts(models.Model):
             self.datetime
         )
 
-
-class PostVoteCount(models.Model):
-    post = models.ForeignKey(Posts, on_delete=models.CASCADE)
+class PostVotes(models.Model):
+    post = models.ForeignKey(Posts, on_delete=models.CASCADE, related_name="post_votes")
     vote = models.BooleanField()
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
     datetime = models.DateTimeField(auto_now=True)
