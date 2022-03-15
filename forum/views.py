@@ -28,9 +28,10 @@ class MakePost(APIView):
         if serializer.is_valid():
             post = serializer.save()
             if post:
-                return Response("Made Post!!!", status=status.HTTP_201_CREATED)
+                # return Response("Made Post!!!", status=status.HTTP_201_CREATED)
+                return Response({"Posted": ""}, status=status.HTTP_201_CREATED)
             else:
-                return Response("Make-Post Failed!", status=status.HTTP_400_BAD_REQUEST)
+                return Response({"Post Failed": ""}, status=status.HTTP_400_BAD_REQUEST)
 
 
 # Vote Post
