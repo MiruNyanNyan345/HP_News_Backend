@@ -46,8 +46,8 @@ class Replies(models.Model):
         )
 
 
-class ReplyVoteCount(models.Model):
-    reply = models.ForeignKey(Replies, on_delete=models.CASCADE)
+class ReplyVotes(models.Model):
+    reply = models.ForeignKey(Replies, on_delete=models.CASCADE, related_name="reply_votes")
     vote = models.BooleanField()
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
     datetime = models.DateTimeField(auto_now=True)

@@ -2,7 +2,7 @@ from datetime import datetime
 
 from rest_framework import serializers
 
-from .models import Posts, PostVotes, Replies, ReplyVoteCount
+from .models import Posts, PostVotes, Replies, ReplyVotes
 
 
 class GetPostsVotesSerializer(serializers.ModelSerializer):
@@ -96,9 +96,24 @@ class ReplyPostSerializer(serializers.ModelSerializer):
         return instance
 
 
+class GetRepliesVotesSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ReplyVotes
+        fields = ("reply_id", "vote")
+
+
+class GetRepliesSerializer(serializers.ModelSerializer):
+    reply_votes = GetRepliesVotesSerializer(read_only=True, many=True)
+
+    class Meta:
+        model = Posts
+        fields = ("id", "body", "author", "datetime", "reply_votes")
+        depth = 1
+
+
 class VoteReplySerializer(serializers.ModelSerializer):
     class Meta:
-        model = ReplyVoteCount
+        model = ReplyVotes
         fields = ("reply", "vote")
 
     def __init__(self, *args, **kwargs):
