@@ -3,6 +3,13 @@ from datetime import datetime
 from rest_framework import serializers
 
 from .models import Posts, PostVotes, Replies, ReplyVotes
+from account.models import CustomUser
+
+
+class getUserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CustomUser
+        fields = ('id', 'username', 'email')
 
 
 class GetPostsVotesSerializer(serializers.ModelSerializer):
@@ -11,8 +18,10 @@ class GetPostsVotesSerializer(serializers.ModelSerializer):
         fields = ("post_id", "vote")
 
 
+
 class GetPostsSerializer(serializers.ModelSerializer):
     post_votes = GetPostsVotesSerializer(read_only=True, many=True)
+    author = getUserSerializer()
 
     class Meta:
         model = Posts
@@ -104,6 +113,7 @@ class GetRepliesVotesSerializer(serializers.ModelSerializer):
 
 class GetRepliesSerializer(serializers.ModelSerializer):
     reply_votes = GetRepliesVotesSerializer(read_only=True, many=True)
+    author = getUserSerializer()
 
     class Meta:
         model = Posts
