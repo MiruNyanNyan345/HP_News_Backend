@@ -17,6 +17,7 @@ class Posts(models.Model):
             self.datetime
         )
 
+
 class PostVotes(models.Model):
     post = models.ForeignKey(Posts, on_delete=models.CASCADE, related_name="post_votes")
     vote = models.BooleanField()
@@ -32,6 +33,7 @@ class PostVotes(models.Model):
         )
 
 
+# Reply
 class Replies(models.Model):
     post = models.ForeignKey(Posts, on_delete=models.CASCADE)
     body = models.CharField(max_length=255)
@@ -46,6 +48,7 @@ class Replies(models.Model):
         )
 
 
+# Vote reply
 class ReplyVotes(models.Model):
     reply = models.ForeignKey(Replies, on_delete=models.CASCADE, related_name="reply_votes")
     vote = models.BooleanField()
@@ -58,4 +61,16 @@ class ReplyVotes(models.Model):
             self.vote,
             self.user,
             self.datetime
+        )
+
+
+# Save post
+class SavePost(models.Model):
+    post = models.ForeignKey(Posts, on_delete=models.CASCADE)
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return "Post: {}\nUser: {}".format(
+            self.post,
+            self.user,
         )

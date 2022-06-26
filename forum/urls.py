@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import MakePost, VotePost, ReplyPost, VoteReply, GetPosts, GetReplies
+from .views import MakePost, VotePost, ReplyPost, VoteReply, GetPosts, GetReplies, SavePost
 
 urlpatterns = [
     path('post/get_posts/', GetPosts.as_view(), name='get_posts'),
@@ -8,4 +8,5 @@ urlpatterns = [
     path('post/get_replies/', GetReplies.as_view(), name='get_replies'),
     path('post/reply/', ReplyPost.as_view(), name='reply_post'),
     path('post/vote_reply/', VoteReply.as_view(), name='reply_post'),
+    path('post/save_post/', SavePost.as_view(), name='save_post'),
 ]

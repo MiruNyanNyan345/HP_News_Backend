@@ -4,7 +4,7 @@ from rest_framework.views import APIView
 
 from .models import Posts, PostVotes, Replies
 from .serializer import MakePostSerializer, VotePostSerializer, ReplyPostSerializer, VoteReplySerializer, \
-    GetPostsSerializer, GetRepliesSerializer
+    GetPostsSerializer, GetRepliesSerializer, SavePostSerializer
 
 
 # Get all Posts and their Votes
@@ -59,7 +59,7 @@ class GetReplies(APIView):
         post_id = request.query_params['post_id']
         replies = Replies.objects.filter(post__replies=post_id).order_by('-datetime')
         # First Replies come first
-        r_serializer = GetRepliesSerializer(replies, many=True,)
+        r_serializer = GetRepliesSerializer(replies, many=True, )
         return Response(r_serializer.data, status=status.HTTP_200_OK)
 
 
@@ -95,3 +95,19 @@ class VoteReply(APIView):
                 return Response("Failed!", status=status.HTTP_400_BAD_REQUEST)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+# Save Post
+class SavePost(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request):
+        serializer = SavePostSerializer(data=request.data, user=request.user)
+        if serializer.is_valid():
+            saved = serializer.save()
+            if saved:
+                return Response("Saved Post", status=status.HTTP_201_CREATED)
+            else:
+                return Response("Unsaved Post", status=status.HTTP_204_NO_CONTENT)
+        else:
+            return Response("Failed!", status=status.HTTP_400_BAD_REQUEST)

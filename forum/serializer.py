@@ -1,8 +1,9 @@
 from datetime import datetime
 
 from rest_framework import serializers
+from rest_framework.response import Response
 
-from .models import Posts, PostVotes, Replies, ReplyVotes
+from .models import Posts, PostVotes, Replies, ReplyVotes, SavePost
 from account.models import CustomUser
 
 
@@ -16,7 +17,6 @@ class GetPostsVotesSerializer(serializers.ModelSerializer):
     class Meta:
         model = PostVotes
         fields = ("post_id", "vote")
-
 
 
 class GetPostsSerializer(serializers.ModelSerializer):
@@ -153,3 +153,35 @@ class VoteReplySerializer(serializers.ModelSerializer):
         print("Reply-Vote Instance:\n", instance)
 
         return instance
+
+
+class SavePostSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SavePost
+        fields = ('post',)
+
+    def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop("user")
+        super(SavePostSerializer, self).__init__(*args, **kwargs)
+
+    def validate(self, data):
+        user_id = self.user.id
+        post_id = data.pop("post", None).id
+        data['user_id'] = user_id
+        data['post_id'] = post_id
+        return data
+
+    def create(self, validated_data):
+        post_id = validated_data.pop("post_id", None)
+        user_id = validated_data.pop("user_id", None)
+
+        instance = self.Meta.model(post_id=post_id, user_id=user_id)
+        if self.Meta.model.objects.filter(user_id=user_id, post_id=post_id):
+            t = self.Meta.model.objects.filter(user_id=user_id, post_id=post_id).first()
+            t.delete()
+            print("Unsaved Post Instance:\n{}".format(instance))
+            return False
+        else:
+            instance.save()
+            print("Save Post Instance:\n{}".format(instance))
+            return True
