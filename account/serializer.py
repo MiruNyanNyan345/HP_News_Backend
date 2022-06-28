@@ -14,6 +14,7 @@ class UserAuthenticateSerializer(TokenObtainPairSerializer):
     def validate(self, user):
         data = super(UserAuthenticateSerializer, self).validate(user)
         data.update({"username": self.user.username})
+        data.update({"email": self.user.email})
         return data
 
 
@@ -97,5 +98,50 @@ class UserPasswordChangeSerializer(serializers.ModelSerializer):
         user = self.validated_data.pop('user', None)
         new_password = self.validated_data.pop('new_password', None)
         user.set_password(new_password)
+        user.save()
+        return user
+
+
+class UserNameChangeSerializer(serializers.ModelSerializer):
+    new_username = serializers.CharField(max_length=255)
+
+    class Meta:
+        model = CustomUser
+        fields = ('new_username',)
+
+    def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop("user")
+        super(UserNameChangeSerializer, self).__init__(*args, **kwargs)
+
+    def update(self, instance, data):
+        new_username = self.data.pop('new_username', None)
+        instance.username = new_username
+        instance.save()
+        return instance
+
+
+class UserEmailChangeSerializer(serializers.ModelSerializer):
+    new_email = serializers.EmailField(max_length=255)
+
+    class Meta:
+        model = CustomUser
+        fields = ('new_email',)
+
+    def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop("user")
+        super(UserEmailChangeSerializer, self).__init__(*args, **kwargs)
+
+    def validate(self, data):
+        new_email = data.pop('new_email', None)
+        if self.Meta.model.objects.filter(email=new_email).exists():
+            raise serializers.ValidationError({'Validation Error': 'Email is already used.'})
+        else:
+            data['new_email'] = new_email
+            return data
+
+    def save(self, **kwargs):
+        new_email = self.data.pop("new_email", None)
+        user = self.user
+        user.email = new_email
         user.save()
         return user

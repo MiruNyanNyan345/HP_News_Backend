@@ -4,7 +4,8 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework_simplejwt.views import TokenObtainPairView
 
-from .serializer import UserAuthenticateSerializer, UserCreateSerializer, UserPasswordChangeSerializer
+from .serializer import UserAuthenticateSerializer, UserCreateSerializer, UserPasswordChangeSerializer, \
+    UserNameChangeSerializer, UserEmailChangeSerializer
 
 
 # Login; Get Token
@@ -37,5 +38,29 @@ class UserPasswordChange(APIView):
         if serializer.is_valid():
             serializer.save()
             return Response('Password Updated', status=status.HTTP_200_OK)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class UserNameChange(APIView):
+    permission_classes = (permissions.IsAuthenticated,)
+
+    def post(self, request):
+        serializer = UserNameChangeSerializer(data=request.data, user=request.user)
+        if serializer.is_valid():
+            serializer.update(instance=request.user, data=request.data)
+            return Response('Username Updated', status=status.HTTP_200_OK)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class UserEmailChange(APIView):
+    permission_classes = (permissions.IsAuthenticated,)
+
+    def post(self, request):
+        serializer = UserEmailChangeSerializer(data=request.data, user=request.user)
+        if serializer.is_valid():
+            serializer.save()
+            return Response('Email Updated', status=status.HTTP_200_OK)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
