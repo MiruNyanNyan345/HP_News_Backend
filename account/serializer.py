@@ -59,3 +59,43 @@ class UserCreateSerializer(serializers.ModelSerializer):
 
         instance.save()
         return instance
+
+
+class UserPasswordChangeSerializer(serializers.ModelSerializer):
+    email = serializers.EmailField(required=True)
+    new_password = serializers.CharField(min_length=8, write_only=True)
+    confirm_new_password = serializers.CharField(write_only=True)
+
+    class Meta:
+        model = CustomUser
+        fields = ('email', 'password', 'new_password', 'confirm_new_password')
+
+    def validate(self, data, user=None):
+        if user:
+            email = user.email
+        else:
+            email = data.pop('email', None)
+        old_password = data.pop('password', None)
+        try:
+            user = self.Meta.model.objects.get(email=email)
+        except:
+            raise serializers.ValidationError({"Validation Error": 'Incorrect Email'})
+        if user.check_password(raw_password=old_password):
+            new_password = data.pop('new_password', None)
+            confirm_new_password = data.pop('confirm_new_password', None)
+            if new_password != confirm_new_password:
+                raise serializers.ValidationError({"Validation Error": 'New password and confirm password doesn\'t '
+                                                                       'match.'})
+            else:
+                data['user'] = user
+                data['new_password'] = new_password
+                return data
+        else:
+            raise serializers.ValidationError({"Validation Error": 'Incorrect Password'})
+
+    def save(self, **kwargs):
+        user = self.validated_data.pop('user', None)
+        new_password = self.validated_data.pop('new_password', None)
+        user.set_password(new_password)
+        user.save()
+        return user

@@ -69,7 +69,6 @@ class VotePostSerializer(serializers.ModelSerializer):
         return data
 
     def create(self, validated_data):
-        print(validated_data)
         vote = validated_data.pop("vote", None)
         post_id = validated_data.pop("post_id", None)
         user_id = validated_data.pop("user_id", None)

@@ -2,7 +2,7 @@ from rest_framework import permissions, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .models import Posts, PostVotes, Replies
+from .models import Posts, Replies, SavePost
 from .serializer import MakePostSerializer, VotePostSerializer, ReplyPostSerializer, VoteReplySerializer, \
     GetPostsSerializer, GetRepliesSerializer, SavePostSerializer
 
@@ -98,7 +98,7 @@ class VoteReply(APIView):
 
 
 # Save Post
-class SavePost(APIView):
+class SaveForumPost(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request):
@@ -108,6 +108,33 @@ class SavePost(APIView):
             if saved:
                 return Response("Saved Post", status=status.HTTP_201_CREATED)
             else:
-                return Response("Unsaved Post", status=status.HTTP_204_NO_CONTENT)
+                return Response("Unsaved Post", status=status.HTTP_200_OK)
         else:
             return Response("Failed!", status=status.HTTP_400_BAD_REQUEST)
+
+
+# Check if request post is saved by user
+class CheckPostIsSaved(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        post_id = request.query_params['post_id']
+        user_id = request.user.id
+        if SavePost.objects.filter(post_id=post_id, user_id=user_id).exists():
+            return Response(1, status=status.HTTP_200_OK)
+        else:
+            return Response(0, status=status.HTTP_200_OK)
+
+
+# Get all user's saved posts
+class GetAllSavedPost(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        user_id = request.user.id
+        savedPosts = SavePost.objects.filter(user_id=user_id).all()
+        sp_objs = []
+        for i in savedPosts:
+            sp_objs.append(Posts.objects.get(id=i.post_id))
+        serializer = GetPostsSerializer(sp_objs, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)

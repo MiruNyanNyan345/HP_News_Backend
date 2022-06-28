@@ -4,7 +4,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework_simplejwt.views import TokenObtainPairView
 
-from .serializer import UserAuthenticateSerializer, UserCreateSerializer
+from .serializer import UserAuthenticateSerializer, UserCreateSerializer, UserPasswordChangeSerializer
 
 
 # Login; Get Token
@@ -25,3 +25,17 @@ class UserCreate(APIView):
                 json = serializer.data
                 return Response(json, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class UserPasswordChange(APIView):
+    permission_classes = [permissions.AllowAny]
+
+    def post(self, request):
+        if not request.user.is_anonymous:
+            request.data['email'] = request.user.email
+        serializer = UserPasswordChangeSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response('Password Updated', status=status.HTTP_200_OK)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
