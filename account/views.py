@@ -46,9 +46,9 @@ class UserNameChange(APIView):
     permission_classes = (permissions.IsAuthenticated,)
 
     def post(self, request):
-        serializer = UserNameChangeSerializer(data=request.data, user=request.user)
+        serializer = UserNameChangeSerializer(data=request.data)
         if serializer.is_valid():
-            serializer.update(instance=request.user, data=request.data)
+            serializer.update(instance=request.user, validated_data=serializer.validated_data)
             return Response('Username Updated', status=status.HTTP_200_OK)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -58,9 +58,9 @@ class UserEmailChange(APIView):
     permission_classes = (permissions.IsAuthenticated,)
 
     def post(self, request):
-        serializer = UserEmailChangeSerializer(data=request.data, user=request.user)
+        serializer = UserEmailChangeSerializer(data=request.data)
         if serializer.is_valid():
-            serializer.save()
+            serializer.update(instance=request.user, validated_data=serializer.validated_data)
             return Response('Email Updated', status=status.HTTP_200_OK)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

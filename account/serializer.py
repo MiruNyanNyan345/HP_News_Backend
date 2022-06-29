@@ -57,7 +57,6 @@ class UserCreateSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         instance = self.Meta.model(**validated_data)
-
         instance.save()
         return instance
 
@@ -101,47 +100,39 @@ class UserPasswordChangeSerializer(serializers.ModelSerializer):
         user.save()
         return user
 
-
 class UserNameChangeSerializer(serializers.ModelSerializer):
-    new_username = serializers.CharField(max_length=255)
-
     class Meta:
         model = CustomUser
-        fields = ('new_username',)
+        fields = ('username',)
 
-    def __init__(self, *args, **kwargs):
-        self.user = kwargs.pop("user")
-        super(UserNameChangeSerializer, self).__init__(*args, **kwargs)
+    def validate(self, data):
+        new_username = data.get('username')
+        if self.Meta.model.objects.filter(username=new_username).exists():
+            raise serializers.ValidationError({'Validation Error': 'Username has already been used.'})
+        else:
+            return data
 
-    def update(self, instance, data):
-        new_username = self.data.pop('new_username', None)
+    def update(self, instance, validated_data):
+        new_username = validated_data.pop('username', None)
         instance.username = new_username
         instance.save()
         return instance
 
 
 class UserEmailChangeSerializer(serializers.ModelSerializer):
-    new_email = serializers.EmailField(max_length=255)
-
     class Meta:
         model = CustomUser
-        fields = ('new_email',)
-
-    def __init__(self, *args, **kwargs):
-        self.user = kwargs.pop("user")
-        super(UserEmailChangeSerializer, self).__init__(*args, **kwargs)
+        fields = ('email',)
 
     def validate(self, data):
-        new_email = data.pop('new_email', None)
+        new_email = data.get('email')
         if self.Meta.model.objects.filter(email=new_email).exists():
-            raise serializers.ValidationError({'Validation Error': 'Email is already used.'})
+            raise serializers.ValidationError({'Validation Error': 'Email has already been used.'})
         else:
-            data['new_email'] = new_email
             return data
 
-    def save(self, **kwargs):
-        new_email = self.data.pop("new_email", None)
-        user = self.user
-        user.email = new_email
-        user.save()
-        return user
+    def update(self, instance, validated_data):
+        new_email = validated_data.pop('email', None)
+        instance.email = new_email
+        instance.save()
+        return instance
