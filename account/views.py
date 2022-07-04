@@ -36,7 +36,7 @@ class UserPasswordChange(APIView):
             request.data['email'] = request.user.email
         serializer = UserPasswordChangeSerializer(data=request.data)
         if serializer.is_valid():
-            serializer.save()
+            serializer.update(instance=request.user, validated_data=serializer.validated_data)
             return Response('Password Updated', status=status.HTTP_200_OK)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -49,7 +49,7 @@ class UserNameChange(APIView):
         serializer = UserNameChangeSerializer(data=request.data)
         if serializer.is_valid():
             serializer.update(instance=request.user, validated_data=serializer.validated_data)
-            return Response('Username Updated', status=status.HTTP_200_OK)
+            return Response({"Successful": 'Username Updated'}, status=status.HTTP_200_OK)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -61,6 +61,6 @@ class UserEmailChange(APIView):
         serializer = UserEmailChangeSerializer(data=request.data)
         if serializer.is_valid():
             serializer.update(instance=request.user, validated_data=serializer.validated_data)
-            return Response('Email Updated', status=status.HTTP_200_OK)
+            return Response({"Successful": 'Email Updated'}, status=status.HTTP_200_OK)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

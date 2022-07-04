@@ -29,9 +29,9 @@ class MakePost(APIView):
             post = serializer.save()
             if post:
                 # return Response("Made Post!!!", status=status.HTTP_201_CREATED)
-                return Response({"Posted": ""}, status=status.HTTP_201_CREATED)
+                return Response("", status=status.HTTP_201_CREATED)
             else:
-                return Response({"Post Failed": ""}, status=status.HTTP_400_BAD_REQUEST)
+                return Response("", status=status.HTTP_400_BAD_REQUEST)
 
 
 # Vote Post
@@ -57,7 +57,7 @@ class GetReplies(APIView):
 
     def get(self, request):
         post_id = request.query_params['post_id']
-        replies = Replies.objects.filter(post__replies=post_id).order_by('-datetime')
+        replies = Replies.objects.filter(post_id=post_id).order_by('-datetime')
         # First Replies come first
         r_serializer = GetRepliesSerializer(replies, many=True, )
         return Response(r_serializer.data, status=status.HTTP_200_OK)
@@ -108,7 +108,7 @@ class SaveForumPost(APIView):
             if saved:
                 return Response("Saved Post", status=status.HTTP_201_CREATED)
             else:
-                return Response("Unsaved Post", status=status.HTTP_200_OK)
+                return Response("Unsaved Post", status=status.HTTP_201_CREATED)
         else:
             return Response("Failed!", status=status.HTTP_400_BAD_REQUEST)
 
@@ -121,9 +121,9 @@ class CheckPostIsSaved(APIView):
         post_id = request.query_params['post_id']
         user_id = request.user.id
         if SavePost.objects.filter(post_id=post_id, user_id=user_id).exists():
-            return Response(1, status=status.HTTP_200_OK)
+            return Response({'isSaved': 1}, status=status.HTTP_200_OK)
         else:
-            return Response(0, status=status.HTTP_200_OK)
+            return Response({'isSaved': 0}, status=status.HTTP_200_OK)
 
 
 # Get all user's saved posts

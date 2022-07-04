@@ -63,7 +63,7 @@ class VotePostSerializer(serializers.ModelSerializer):
         user = self.user
         post_id = data.pop("post", None).id
         if self.Meta.model.objects.filter(user_id=user.id, post_id=post_id):
-            raise serializers.ValidationError({"vote_error": "You have voted this post!!!"})
+            raise serializers.ValidationError({'Vote Error': "You have voted this post!!!"})
         data["user_id"] = self.user.id
         data["post_id"] = post_id
         return data
