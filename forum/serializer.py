@@ -7,7 +7,7 @@ from .models import Posts, PostVotes, Replies, ReplyVotes, SavePost
 from account.models import CustomUser
 
 
-class getUserSerializer(serializers.ModelSerializer):
+class GetUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
         fields = ('id', 'username', 'email')
@@ -21,11 +21,12 @@ class GetPostsVotesSerializer(serializers.ModelSerializer):
 
 class GetPostsSerializer(serializers.ModelSerializer):
     post_votes = GetPostsVotesSerializer(read_only=True, many=True)
-    author = getUserSerializer()
+    author = GetUserSerializer()
+    isSaved = serializers.BooleanField()
 
     class Meta:
         model = Posts
-        fields = ("id", "title", "body", "author", "datetime", "post_votes")
+        fields = ("id", "title", "body", "author", "datetime", "post_votes", 'isSaved')
         depth = 1
 
 
@@ -112,7 +113,7 @@ class GetRepliesVotesSerializer(serializers.ModelSerializer):
 
 class GetRepliesSerializer(serializers.ModelSerializer):
     reply_votes = GetRepliesVotesSerializer(read_only=True, many=True)
-    author = getUserSerializer()
+    author = GetUserSerializer()
 
     class Meta:
         model = Posts

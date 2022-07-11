@@ -1,3 +1,4 @@
+from django.db.models import Exists, OuterRef, Value, BooleanField
 from rest_framework import permissions, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -9,11 +10,17 @@ from .serializer import MakePostSerializer, VotePostSerializer, ReplyPostSeriali
 
 # Get all Posts and their Votes
 class GetPosts(APIView):
-    permission_classes = [permissions.AllowAny]
+    permission_classes = (permissions.AllowAny,)
 
     def get(self, request):
         # First post come first
         posts = Posts.objects.all().order_by("-datetime")
+        if request.user.is_authenticated:
+            posts = posts.annotate(
+                isSaved=Exists(SavePost.objects.filter(user_id=request.user.id, post=OuterRef('id'))))
+        else:
+            posts = posts.annotate(
+                isSaved=Value(False, output_field=BooleanField()))
         p_serializer = GetPostsSerializer(posts, many=True)
         return Response(p_serializer.data, status=status.HTTP_200_OK)
 
@@ -103,6 +110,7 @@ class SaveForumPost(APIView):
 
     def post(self, request):
         serializer = SavePostSerializer(data=request.data, user=request.user)
+        print(serializer)
         if serializer.is_valid():
             saved = serializer.save()
             if saved:
